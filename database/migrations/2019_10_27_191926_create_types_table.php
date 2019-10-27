@@ -33,13 +33,13 @@ class CreateTypesTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('subtype_id');
             $table->string('name');
-            $table->string('avatar');
+            $table->string('avatar')->nullable();
             $table->date('birth_date');
-            $table->date('death_date');
-            $table->string('chip')->unique();
-            $table->decimal('weight',6,2);
-            $table->boolean('ppp');
-            $table->boolean('sterilized');
+            $table->date('death_date')->nullable();
+            $table->string('chip')->unique()->nullable();
+            $table->decimal('weight', 6, 2);
+            $table->boolean('dangerous')->default(false); // PPP Perros Potencialmente Peligrosos
+            $table->boolean('sterilized')->default(false);
             $table->boolean('sex'); //1 for males 0 for females
             $table->text('observations')->nullable();
 
@@ -49,6 +49,19 @@ class CreateTypesTable extends Migration
                 ->references('id')
                 ->on('subtypes');
         });
+
+        Schema::create('persons', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->string('last_name');
+            $table->string('email')->nullable();
+            $table->string('phone')->nullable();
+            $table->string('address')->nullable();
+            $table->text('observations')->nullable();
+
+            $table->timestamps();
+        });
+
     }
 
     /**
@@ -61,5 +74,6 @@ class CreateTypesTable extends Migration
         Schema::dropIfExists('sub_types');
         Schema::dropIfExists('types');
         Schema::dropIfExists('animals');
+        Schema::dropIfExists('persons');
     }
 }
