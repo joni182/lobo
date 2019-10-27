@@ -62,6 +62,52 @@ class CreateTypesTable extends Migration
             $table->timestamps();
         });
 
+        Schema::create('adoptions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedBigInteger('animal_id');
+            $table->unsignedBigInteger('person_id');
+            $table->boolean('temporal');//temporales = acogida
+            $table->date('start');
+            $table->date('finish')->nullable();
+            $table->text('observations');
+
+            $table->timestamps();
+
+            $table->foreign('animal_id')
+                ->references('id')
+                ->on('animals');
+
+            $table->foreign('person_id')
+                ->references('id')
+                ->on('persons');
+        });
+
+        Schema::create('vaccines', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->unsignedInteger('type_id'); //different type organism different vaccine
+            $table->string('name');
+            $table->integer('doses')->default(1); // -1 for forever
+            $table->unsignedInteger('day_interval')->nullable(); // number of days between doses
+
+            $table->foreign('type_id')
+                ->references('id')
+                ->on('types');
+        });
+
+        Schema::create('animal_has_vaccines', function (Blueprint $table) {
+            $table->unsignedBigInteger('animal_id');
+            $table->unsignedBigInteger('vaccine_id');
+
+            $table->foreign('animal_id')
+                ->references('id')
+                ->on('animals');
+
+            $table->foreign('vaccine_id')
+                ->references('id')
+                ->on('vaccines');
+        });
+
+
     }
 
     /**
@@ -75,5 +121,7 @@ class CreateTypesTable extends Migration
         Schema::dropIfExists('types');
         Schema::dropIfExists('animals');
         Schema::dropIfExists('persons');
+        Schema::dropIfExists('adoptions');
+        Schema::dropIfExists('vaccines');
     }
 }
