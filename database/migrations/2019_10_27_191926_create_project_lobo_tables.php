@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTypesTable extends Migration
+class CreateProjectLoboTables extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,13 @@ class CreateTypesTable extends Migration
      */
     public function up()
     {
+        //Tipos y subtipos ayudan a clasificar animales para filtrar
         Schema::create('types', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
         });
 
+        //Tipos y subtipos ayudan a clasificar animales para filtrar
         Schema::create('subtypes', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('type_id');
@@ -29,9 +31,10 @@ class CreateTypesTable extends Migration
                 ->onDelete('cascade');
         });
 
+        //Ficha del animal
         Schema::create('animals', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedInteger('subtype_id');
+            $table->unsignedInteger('subtype_id');// Para el Tipo principal podemos buscarlos con un join
             $table->string('name');
             $table->string('avatar')->nullable();
             $table->date('birth_date');
@@ -50,6 +53,7 @@ class CreateTypesTable extends Migration
                 ->on('subtypes');
         });
 
+        //Gente/contactos, adoptadores principalmente
         Schema::create('persons', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('name');
@@ -62,11 +66,12 @@ class CreateTypesTable extends Migration
             $table->timestamps();
         });
 
+        //Representa una unión entre humano y animal
         Schema::create('adoptions', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('animal_id');
             $table->unsignedBigInteger('person_id');
-            $table->boolean('temporal');//temporales = acogida
+            $table->boolean('temporal');//temporales = acogida no temporales adopción
             $table->date('start');
             $table->date('finish')->nullable();
             $table->text('observations');
@@ -82,6 +87,8 @@ class CreateTypesTable extends Migration
                 ->on('persons');
         });
 
+        //Vacunas, el farmaco en si, es una lista de vacunas existentes
+        //TODO: ¿Hacemos una lista de vacunas obligatorias/disponibles por tipo de animal?
         Schema::create('vaccines', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('type_id'); //different type organism different vaccine
@@ -94,6 +101,7 @@ class CreateTypesTable extends Migration
                 ->on('types');
         });
 
+        //Si el animal tiene una vacuna en concreto
         Schema::create('animal_has_vaccines', function (Blueprint $table) {
             $table->unsignedBigInteger('animal_id');
             $table->unsignedBigInteger('vaccine_id');
@@ -107,7 +115,6 @@ class CreateTypesTable extends Migration
                 ->on('vaccines');
         });
 
-
     }
 
     /**
@@ -117,11 +124,13 @@ class CreateTypesTable extends Migration
      */
     public function down()
     {
+        Schema::dropIfExists('animal_has_vaccines');
+        Schema::dropIfExists('adoptions');
+        Schema::dropIfExists('animals');
         Schema::dropIfExists('sub_types');
         Schema::dropIfExists('types');
-        Schema::dropIfExists('animals');
         Schema::dropIfExists('persons');
-        Schema::dropIfExists('adoptions');
         Schema::dropIfExists('vaccines');
+
     }
 }
